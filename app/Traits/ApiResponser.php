@@ -32,7 +32,6 @@ trait ApiResponser
    * @param int $code
    * @return Illuminate\Http\JsonResponse
    *
-   *
    */
   public function errorResponse($message, $code)
   {
