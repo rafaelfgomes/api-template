@@ -21,15 +21,11 @@ $router->group([ 'prefix' => 'api' ], function () use ($router, $apiVersion) {
 
     $router->group([ 'prefix' => $apiVersion ], function () use ($router) {
 
-        $router->group([ 'prefix' => 'users' ], function () use ($router) {
-
-            $router->get('/', 'UserController@index');
-            $router->get('/{id}', 'UserController@show');
-            $router->post('/', 'UserController@store');
-            $router->put('/{id}', 'UserController@update');
-            $router->delete('/{id}', 'UserController@delete');
-
-        });
+        //User routes
+        $router->get('users[/{id}]', 'UserController@show'); //Optional url parameter "id"
+        $router->post('users', 'UserController@store');
+        $router->put('users/{id}', 'UserController@update');
+        $router->delete('users/{id}', 'UserController@delete');
 
     });
 

@@ -23,20 +23,6 @@ class UserController extends Controller
         //
     }
 
-     /**
-     * Show all users.
-     *
-     * @return Illuminate\Http\JsonResponse
-     *
-     */
-    public function index()
-    {
-
-        $users = User::all();
-        return $this->successResponse($users);
-
-    }
-
     /**
      * Create an resource.
      *
@@ -47,7 +33,9 @@ class UserController extends Controller
     public function store(Request $request)
     {
 
-        $user = User::create($request->all());
+        $this->validate($request, User::validationFormRules());
+
+        $user = User::create(User::setUserData($request));
         return $this->successResponse($user, Response::HTTP_CREATED);
 
     }
@@ -59,11 +47,11 @@ class UserController extends Controller
      * @return Illuminate\Http\JsonResponse
      *
      */
-    public function show($id)
+    public function show($id = null)
     {
 
-        $user = User::findOrFail($id);
-        return $this->successResponse($user);
+        $users = (is_null($id)) ? User::all() : User::findOrFail($id);
+        return $this->successResponse($users);
 
     }
 
@@ -78,8 +66,10 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
 
+        $this->validate($request, User::validationFormRules(true));
+
         $user = User::findOrFail($id);
-        $user->fill($request->all());
+        $user->fill(User::setUserData($request, true));
 
         if ($user->isClean()) {
 

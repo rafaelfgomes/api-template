@@ -3,16 +3,17 @@
 namespace App\Exceptions;
 
 use Exception;
+use ReflectionException;
 use App\Traits\ApiResponser;
+use BadMethodCallException;
 use Illuminate\Http\Response;
+use Illuminate\Database\QueryException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\QueryException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
-use ReflectionException;
 
 class Handler extends ExceptionHandler
 {
@@ -65,7 +66,7 @@ class Handler extends ExceptionHandler
 
         if ($exception instanceof ModelNotFoundException) {
 
-            $model = strtolower(class_basename($exception->getModel()));
+            $model = $this->getModelName(strtolower(class_basename($exception->getModel())));
             $message = "Não existe(m) nenhum(a) $model cadastrado(s) com esse id";
             $code = Response::HTTP_NOT_FOUND;
 
@@ -87,18 +88,40 @@ class Handler extends ExceptionHandler
 
         if ($exception instanceof ValidationException) {
 
-            return $this->errorResponse($exception->getMessage(), Response::HTTP_FORBIDDEN);
+            return $this->errorResponse($exception->validator->errors()->messages(), Response::HTTP_FORBIDDEN);
 
         }
 
         if ($exception instanceof ReflectionException ||
-            $exception instanceof QueryException) {
+            $exception instanceof QueryException ||
+            $exception instanceof BadMethodCallException) {
 
             return $this->errorResponse($exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
 
         }
 
+        if ($exception instanceof BadMethodCallException) {
+            # code...
+        }
+
         return parent::render($request, $exception);
+
+    }
+
+    public function getModelName($name)
+    {
+
+        switch ($name) {
+            case 'user':
+                $modelName = 'usuário(s)';
+                break;
+
+            default:
+                $modelName = $name;
+                break;
+        }
+
+        return $modelName;
 
     }
 
