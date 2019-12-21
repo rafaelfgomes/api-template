@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Traits\ApiResponser;
-use App\Http\Requests\Uers\UserStoreRequest;
-use App\Http\Requests\Uers\UserUpdateRequest;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
@@ -23,7 +23,7 @@ class UserController extends Controller
         //
     }
 
-    /**
+     /**
      * Show all users.
      *
      * @return Illuminate\Http\JsonResponse
@@ -44,16 +44,16 @@ class UserController extends Controller
      * @return Illuminate\Http\JsonResponse
      *
      */
-    public function store(UserStoreRequest $request)
+    public function store(Request $request)
     {
 
         $user = User::create($request->all());
-        return $this->successResponse($user, Response::HTTP_CREATE);
+        return $this->successResponse($user, Response::HTTP_CREATED);
 
     }
 
     /**
-     * Show a resource
+     * Show one or all resources
      *
      * @param int $id
      * @return Illuminate\Http\JsonResponse
@@ -75,7 +75,7 @@ class UserController extends Controller
      * @return Illuminate\Http\JsonResponse
      *
      */
-    public function update(UserUpdateRequest $request, $id)
+    public function update(Request $request, $id)
     {
 
         $user = User::findOrFail($id);
