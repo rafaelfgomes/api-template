@@ -2,16 +2,18 @@
 
 namespace App;
 
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Lumen\Auth\Authorizable;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Laravel\Passport\HasApiTokens;
 
 class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
-    use Authenticatable, Authorizable;
+
+    use HasApiTokens, Authenticatable, Authorizable;
 
     /**
      * The attributes that are mass assignable.
@@ -31,10 +33,10 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'password',
     ];
 
-    public static function validationFormRules($isUserUpdate = false)
+    public static function validationFormRules($isUpdate = false, $id = null)
     {
 
-        $emailRule = (!$isUserUpdate) ? 'required|email' : 'required|email|unique:users';
+        $emailRule = ($isUpdate) ? 'required|email|unique:users,email' . $id : 'required|email';
 
         $rules = [
 
@@ -43,7 +45,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
         ];
 
-        if (!$isUserUpdate) {
+        if (!$isUpdate) {
 
             $rules['password'] = 'required|string|min:6';
 
@@ -53,23 +55,23 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
     }
 
-    public static function setUserData($data, $isUserUpdate = false)
+    public static function setData($data, $isUpdate = false)
     {
 
-        $userData = [
+        $fields = [
 
             'name' => $data->input('name'),
             'email' => $data->input('email')
 
         ];
 
-        if (!$isUserUpdate) {
+        if (!$isUpdate) {
 
-            $userData['password'] = Hash::make($data->input('password'));
+            $fields['password'] = Hash::make($data->input('password'));
 
         }
 
-        return $userData;
+        return $fields;
 
     }
 

@@ -4,8 +4,8 @@ namespace App\Exceptions;
 
 use Exception;
 use ReflectionException;
-use App\Traits\ApiResponser;
 use BadMethodCallException;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Response;
 use Illuminate\Database\QueryException;
 use Illuminate\Auth\AuthenticationException;
@@ -14,6 +14,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\Debug\Exception\FatalErrorException;
 
 class Handler extends ExceptionHandler
 {
@@ -76,7 +77,7 @@ class Handler extends ExceptionHandler
 
         if ($exception instanceof AuthorizationException) {
 
-            return $this->errorResponse($exception->getMessage(), Response::HTTP_FORBIDDEN);
+            return $this->errorResponse($exception->getMessage(), Response::HTTP_UNAUTHORIZED);
 
         }
 
@@ -94,17 +95,20 @@ class Handler extends ExceptionHandler
 
         if ($exception instanceof ReflectionException ||
             $exception instanceof QueryException ||
-            $exception instanceof BadMethodCallException) {
+            $exception instanceof BadMethodCallException ||
+            $exception instanceof FatalErrorException) {
 
             return $this->errorResponse($exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
 
         }
 
-        if ($exception instanceof BadMethodCallException) {
-            # code...
+        if (env('APP_DEBUG', false)) {
+
+            return parent::render($request, $exception);
+
         }
 
-        return parent::render($request, $exception);
+        $this->errorResponse('Erro inesperado', Response::HTTP_INTERNAL_SERVER_ERROR);
 
     }
 

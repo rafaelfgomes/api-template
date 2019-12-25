@@ -66,7 +66,7 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
 
-        $this->validate($request, User::validationFormRules(true));
+        $this->validate($request, User::validationFormRules(true, $id));
 
         $user = User::findOrFail($id);
         $user->fill(User::setUserData($request, true));
