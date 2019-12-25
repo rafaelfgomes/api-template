@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Example;
+use App\User;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class ExampleController extends Controller
+class UserController extends Controller
 {
 
     use ApiResponser;
@@ -16,6 +16,7 @@ class ExampleController extends Controller
      * Create a new controller instance.
      *
      * @return void
+     *
      */
     public function __construct()
     {
@@ -32,68 +33,70 @@ class ExampleController extends Controller
     public function store(Request $request)
     {
 
-        $this->validate($request, Example::validationFormRules());
+        $this->validate($request, User::validationFormRules());
 
-        $example = Example::create(Example::setUserData($request));
-        return $this->successResponse($example, Response::HTTP_CREATED);
+        $user = User::create(User::setUserData($request));
+        return $this->successResponse($user, Response::HTTP_CREATED);
 
     }
 
     /**
-     * Show a resource.
+     * Show one or all resources
      *
-     * @param  Illuminate\Http\Request $request
+     * @param int $id
      * @return Illuminate\Http\JsonResponse
      *
      */
     public function show($id = null)
     {
 
-        $examples = (is_null($id)) ? Example::all() : Example::findOrFail($id);
-        return $this->successResponse($examples);
+        $users = (is_null($id)) ? User::all() : User::findOrFail($id);
+        return $this->successResponse($users);
 
     }
 
     /**
-     * Update one resource.
+     * Update a resource
      *
-     * @param  Illuminate\Http\Request $request
+     * @param int $id
+     * @param Illuminate\Http\Request $request
      * @return Illuminate\Http\JsonResponse
      *
      */
     public function update(Request $request, $id)
     {
 
-        $this->validate($request, Example::validationFormRules());
+        $this->validate($request, User::validationFormRules(true, $id));
 
-        $example = Example::findOrFail($id);
-        $example->fill(Example::setData($request));
+        $user = User::findOrFail($id);
+        $user->fill(User::setUserData($request, true));
 
-        if ($example->isClean()) {
+        if ($user->isClean()) {
 
             return $this->errorResponse('É preciso atualizar pelo menos 1 campo', Response::HTTP_UNPROCESSABLE_ENTITY);
 
         }
 
-        $example->save();
+        $user->save();
 
-        return $this->successResponse($example);
+        return $this->successResponse($user);
 
     }
 
     /**
-     * Delete one resource.
+     * Delete a resource
      *
+     * @param int $id
      * @return Illuminate\Http\JsonResponse
      *
      */
     public function delete($id)
     {
 
-        $example = Example::findOrFail($id);
-        $example->delete();
+        $user = User::findOrFail($id);
+        $user->delete();
 
-        return $this->successResponse($example);
+        return $this->successResponse($user);
 
     }
 
